@@ -52,6 +52,7 @@ void werte_ausgeben(const char *dateiname, std::vector<CKomplex> werte, double e
 	int N = werte.size();
 	// File oeffnen
 	std::ofstream fp;
+	//fp.precision(10);
 	fp.open(dateiname);
 	// Dimension in das File schreiben
 	fp << N << std::endl;
@@ -64,39 +65,24 @@ void werte_ausgeben(const char *dateiname, std::vector<CKomplex> werte, double e
 	fp.close();
 }
 
-std::vector<CKomplex> fourier_trafo1(std::vector<CKomplex> werte) {
-	std::vector<CKomplex> trafo_vals;	trafo_vals.resize(werte.size());
-	std::vector<CKomplex> tmp;			tmp.resize(werte.size());
+std::vector<CKomplex> fourier_trafo(bool hin_trafo, std::vector<CKomplex> werte) {
+	unsigned int N{ werte.size() };
+	std::vector<CKomplex> trafo_vals;	trafo_vals.resize(N);
+	std::vector<CKomplex> tmp;			tmp.resize(N);
 	CKomplex comp_fac{0,0};
 	double phi{ 0.0 };
-	for (int i = 0; i < werte.size(); i++) {	//cn
+	for (int i = 0; i < N; i++) {	//cn
 		tmp[i] = 0;
-		for (int ii = 0; ii < werte.size(); ii++) {
+		for (int ii = 0; ii < N; ii++) {
 			//phi = -((2 * PI*i*ii) / werte.size());
-			phi = double(i)*double(ii)*double(-2)*double(PI) / double(werte.size());
+			if(hin_trafo)
+				phi = double(i)*double(ii)*double(-2)*double(PI) / double(N);
+			else
+				phi = double(i)*double(ii)*double(2)*double(PI) / double(N);
 			comp_fac = CKomplex{ phi };
 			tmp[i] = tmp[i] + (werte[ii] * comp_fac);
 		}
-		trafo_vals[i] = (1 / sqrt(werte.size())) * tmp[i];
-	}
-
-	return trafo_vals;
-}
-
-std::vector<CKomplex> fourier_trafo2(std::vector<CKomplex> werte) {
-	std::vector<CKomplex> trafo_vals;	trafo_vals.resize(werte.size());
-	std::vector<CKomplex> tmp;			tmp.resize(werte.size());
-	CKomplex comp_fac{ 0,0 };
-	double phi{ 0.0 };
-	for (int i = 0; i < werte.size(); i++) {	//cn
-		tmp[i] = 0;
-		for (int ii = 0; ii < werte.size(); ii++) {
-			//phi = ((2 * PI*i*ii)/werte.size());
-			phi = double(i)*double(ii)*double(2)*double(PI) / double(werte.size());
-			comp_fac = CKomplex{ phi };
-			tmp[i] = tmp[i] + (werte[ii] * comp_fac);
-		}
-		trafo_vals[i] = (1 / sqrt(werte.size())) * tmp[i];
+		trafo_vals[i] = (1 / sqrt(N)) * tmp[i];
 	}
 
 	return trafo_vals;
@@ -105,11 +91,21 @@ std::vector<CKomplex> fourier_trafo2(std::vector<CKomplex> werte) {
 int main(){
 	
 	std::vector<CKomplex> vals = werte_einlesen("Daten_original.txt");
+	std::vector<CKomplex> hin_trafo = fourier_trafo(true, vals);
+	std::vector<CKomplex> rueck_trafo = fourier_trafo(false, hin_trafo);
+	/* abpeichern der hin_transformation mit versch. Epsilonen*/
+	werte_ausgeben("stand_eps_hin.txt", hin_trafo);
+	werte_ausgeben("0.1_eps_hin.txt", hin_trafo, 0.1);
+	werte_ausgeben("1.0_eps_hin.txt", hin_trafo, 1.0);
 
-	std::vector<CKomplex> trafo_daten = fourier_trafo1(vals);
-	werte_ausgeben("hin_trafo.txt", trafo_daten);
-	werte_ausgeben("rueck_trafo.txt", fourier_trafo2(trafo_daten));
+	std::vector<CKomplex> hin_trafo = werte_einlesen("stand_eps_hin.txt");
+	
 
 	//std::cin.get();
     return 0;
 }
+
+/*
+TODO
+-abweichungen berechnen(evtl eigene Funk machen)
+*/
