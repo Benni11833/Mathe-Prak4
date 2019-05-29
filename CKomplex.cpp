@@ -6,24 +6,21 @@ CKomplex::CKomplex(double real, double imag){
 
 CKomplex::CKomplex(double phi){
     real_ = cos(phi);
-    /*if(phi == M_PI)
-        imag_ = 0;
-    else*/
     imag_ = sin(phi);
 }
 
 double CKomplex::re() const{ return real_; }
-double CKomplex::imag() const{ return imag_; }
+double CKomplex::im() const{ return imag_; }
 double CKomplex::abs() const{
     return (sqrt(pow(real_, 2) + pow(imag_, 2)));
 }
 
 void CKomplex::print_complex()const {
-    std::cout << real_ << ((imag() >= 0)?" + ":"") << imag_ << "j";
+    std::cout << real_ << ((im() >= 0)?" + ":"") << imag_ << "j";
 }
 
 std::ostream& operator<<(std::ostream & os, CKomplex& c){
-    os << c.re() << ((c.imag() >= 0)?" + ":"") << c.imag() << "j";
+    os << c.re() << ((c.im() >= 0)?" + ":"") << c.im() << "j";
     return os;
 }
 
