@@ -25,7 +25,7 @@ std::ostream& operator<<(std::ostream & os,const CKomplex& c){
 }
 
 CKomplex operator+(const CKomplex& a, const CKomplex& b){
-    CKomplex tmp{a};
+    CKomplex tmp{a.real_, a.imag_};
     tmp.imag_ += b.imag_;
     tmp.real_ += b.real_;
         return tmp;
@@ -39,7 +39,7 @@ CKomplex operator*(const CKomplex& a, const CKomplex& b){
 }
 
 CKomplex operator*(const double& a, const CKomplex& b) {
-	CKomplex tmp{ b };
+	CKomplex tmp{ b.real_, b.imag_ };
 	tmp.real_ = a * b.real_;
 	tmp.imag_ = a * b.imag_;
 	return tmp;

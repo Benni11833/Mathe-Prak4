@@ -3,6 +3,7 @@
 #include <fstream>   
 #include <vector>
 #include <iomanip>
+#include <float.h>
 
 #define PI 3.14159265358979323846264338327950288419
 
@@ -72,13 +73,13 @@ std::vector<CKomplex> fourier_trafo(bool hin_trafo, std::vector<CKomplex> werte)
 	CKomplex comp_fac{0,0};
 	double phi{ 0.0 };
 	for (int i = 0; i < N; i++) {	//cn
-		tmp[i] = 0;
+		tmp[i] = CKomplex{ 0,0 };
 		for (int ii = 0; ii < N; ii++) {
 			//phi = -((2 * PI*i*ii) / werte.size());
 			if(hin_trafo)
-				phi = double(i)*double(ii)*double(-2)*double(PI) / double(N);
+				phi = (double(i)*double(ii)*double(-2)*double(PI)) / double(N);
 			else
-				phi = double(i)*double(ii)*double(2)*double(PI) / double(N);
+				phi = (double(i)*double(ii)*double(2)*double(PI)) / double(N);
 			comp_fac = CKomplex{ phi };
 			tmp[i] = tmp[i] + (werte[ii] * comp_fac);
 		}
@@ -88,20 +89,50 @@ std::vector<CKomplex> fourier_trafo(bool hin_trafo, std::vector<CKomplex> werte)
 	return trafo_vals;
 }
 
+long double getMax(long double x, long double y) {
+	if (x > y)
+		return x;
+	else
+		return y;
+}
+
+long double max_abweichung(std::vector<CKomplex>& ck1, std::vector<CKomplex>& ck2) {
+	long double max = 0.0L;
+	if (ck1.size() == 0 || ck2.size() == 0) {
+		std::cerr << "Vectoren sind leer.\n";
+		return -1;
+	}
+	else {
+		for (int i = 0; i < ck1.size(); i++) {
+			if (abs(ck1[i].re() - ck2[i].re()) > max) {
+				max = abs(ck1[i].re() - ck2[i].re());
+			}
+		}
+	}
+	return max;
+}
+
 int main(){
 	
 	std::vector<CKomplex> vals = werte_einlesen("Daten_original.txt");
 	std::vector<CKomplex> hin_trafo = fourier_trafo(true, vals);
-	std::vector<CKomplex> rueck_trafo = fourier_trafo(false, hin_trafo);
-	/* abpeichern der hin_transformation mit versch. Epsilonen*/
-	werte_ausgeben("stand_eps_hin.txt", hin_trafo);
+	//std::vector<CKomplex> rueck_trafo = fourier_trafo(false, hin_trafo);
+
+	werte_ausgeben("standard_eps_hin.txt", hin_trafo);
 	werte_ausgeben("0.1_eps_hin.txt", hin_trafo, 0.1);
 	werte_ausgeben("1.0_eps_hin.txt", hin_trafo, 1.0);
 
-	std::vector<CKomplex> hin_trafo = werte_einlesen("stand_eps_hin.txt");
-	
+	hin_trafo = werte_einlesen("standard_eps_hin.txt");
+	hin_trafo = fourier_trafo(false, hin_trafo);
+	std::cout << "Maximale Abweichung bei Standard-Epsilon: " << max_abweichung(vals, hin_trafo) << std::endl;
+	hin_trafo = werte_einlesen("0.1_eps_hin.txt");
+	hin_trafo = fourier_trafo(false, hin_trafo);
+	std::cout << "Maximale Abweichung bei epsilon=0.1: " << max_abweichung(vals, hin_trafo) << std::endl;
+	hin_trafo = werte_einlesen("1.0_eps_hin.txt");
+	hin_trafo = fourier_trafo(false, hin_trafo);
+	std::cout << "Maximale Abweichung bei epsilon=1.0: " << max_abweichung(vals, hin_trafo) << std::endl;
 
-	//std::cin.get();
+	system("pause");
     return 0;
 }
 
